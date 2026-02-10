@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,15 @@ class AuthController extends Controller
 
     public function me(): JsonResponse
     {
-        return response()->json(Auth::guard('api')->user());
+        $user = Auth::guard('api')->user();
+
+        if (! $user) {
+            return response()->json([
+                'message' => 'Usuario no autenticado.',
+            ], 401);
+        }
+
+        return response()->json(new UserResource($user->load('personal')));
     }
 
     public function logout(): JsonResponse
@@ -42,12 +51,17 @@ class AuthController extends Controller
     private function respondWithToken(string $token): JsonResponse
     {
         $guard = Auth::guard('api');
+        $user = $guard->user();
+
+        if ($user) {
+            $user->load('personal');
+        }
 
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => $guard->factory()->getTTL() * 60,
-            'user' => $guard->user(),
+            'user' => $user ? new UserResource($user) : null,
         ]);
     }
 }

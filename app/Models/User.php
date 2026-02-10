@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Personal;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -44,6 +45,11 @@ class User extends Authenticatable implements JWTSubject
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function personal()
+    {
+        return $this->belongsTo(Personal::class, 'personal_id', 'PersonalID');
     }
 
     public function getJWTIdentifier(): mixed
