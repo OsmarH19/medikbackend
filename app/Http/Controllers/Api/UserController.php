@@ -14,6 +14,13 @@ use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
+    public function index(): JsonResponse
+    {
+        $users = User::with('personal')->get();
+
+        return response()->json(UserResource::collection($users));
+    }
+
     public function store(Request $request): JsonResponse
     {
         $id = $request->input('id');
